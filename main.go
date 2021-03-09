@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"os"
@@ -15,21 +16,24 @@ func main() {
 	flag.BoolVar(&isDecode,"d", false, "Decode QR encoded string")
 	flag.Parse()
 
+	var stdinBuffer bytes.Buffer
+
 	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	bytesStdin := scanner.Bytes()
+	for scanner.Scan() {
+		stdinBuffer.Write(scanner.Bytes())
+	}
 
 	var bytesStdout []byte
 	if isDecode {
 		var err error
-		bytesStdout, err = qrDecode(bytesStdin)
+		bytesStdout, err = qrDecode(stdinBuffer.Bytes())
 
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Error decoding QR base45 string. Did you forget to escape dollar signs or used single quotes to echo?")
 			os.Exit(1)
 		}
 	} else {
-		bytesStdout = qrEncode(bytesStdin)
+		bytesStdout = qrEncode(stdinBuffer.Bytes())
 	}
 
 	fmt.Println(string(bytesStdout))
