@@ -25,7 +25,7 @@ func main() {
 		bytesStdout, err = qrDecode(bytesStdin)
 
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error decoding QR base45 string: "+err.Error())
+			fmt.Fprintln(os.Stderr, "Error decoding QR base45 string. Did you forget to escape dollar signs or used single quotes to echo?")
 			os.Exit(1)
 		}
 	} else {
