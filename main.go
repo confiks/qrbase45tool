@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/confiks/qrbase45tool/qr"
 	"io/ioutil"
 	"os"
 )
@@ -20,7 +21,8 @@ func main() {
 	flag.Parse()
 
 	if inputFilePath == "" || outputFilePath == "" {
-		exit("No input or output file path provided")
+		flag.Usage()
+		exit("\nNo input or output file path provided")
 	}
 
 	if _, err := os.Stat(inputFilePath); os.IsNotExist(err) {
@@ -35,13 +37,13 @@ func main() {
 	var outputBytes []byte
 	if isDecode {
 		var err error
-		outputBytes, err = qrDecode(inputBytes)
+		outputBytes, err = qr.QrDecode(inputBytes)
 
 		if err != nil {
 			exit("Error decoding QR base45 string. Did you forget to escape dollar signs or used single quotes to echo?")
 		}
 	} else {
-		outputBytes = qrEncode(inputBytes)
+		outputBytes = qr.QrEncode(inputBytes)
 	}
 
 	ioutil.WriteFile(outputFilePath, outputBytes, 0644)
