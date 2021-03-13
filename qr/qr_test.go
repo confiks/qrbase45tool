@@ -63,8 +63,14 @@ func TestQRImplementationCorrespondence(t *testing.T) {
 	input := genBytes()
 	e1 := QrEncode(input)
 	e2 := QrEncodeAlternative(input)
+	e3 := QrEncodeStreaming(input)
 
 	err := bytesMatch(e1, e2)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	err = bytesMatch(e2, e3)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -103,5 +109,11 @@ func BenchmarkQRDecodeAlternative(b *testing.B) {
 		if err != nil {
 			b.FailNow()
 		}
+	}
+}
+
+func BenchmarkQREncodeStreaming(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		QrEncodeStreaming(benchmarkBytes)
 	}
 }

@@ -77,7 +77,6 @@ func QrEncodeAlternative(input []byte) []byte {
 
 	for len(divident.Bits()) != 0 {
 		divident, remainder = divident.QuoRem(divident, bigQrCharsetLen, remainder)
-		fmt.Println(remainder.Int64())
 		output = append(output, qrCharset[remainder.Int64()])
 	}
 
@@ -103,6 +102,43 @@ func QrDecodeAlternative(input []byte) ([]byte, error) {
 	}
 
 	return result.Bytes(), nil
+}
+
+func QrEncodeStreaming(input []byte) []byte {
+	estOutputLen := int(float64(len(input))*1.4568) + 1
+	outputInts := make([]int, 0, estOutputLen)
+
+	outputLength := 0
+	for _, inputByte := range input {
+		carry := int(inputByte)
+
+		for i := 0; i < outputLength; i++ {
+			carry += outputInts[i] << 8
+			outputInts[i] = carry % qrCharsetLen
+			carry /= qrCharsetLen
+			fmt.Println(carry)
+		}
+
+		for carry > 0 {
+			outputInts = append(outputInts, carry % qrCharsetLen)
+			outputLength += 1
+			carry /= qrCharsetLen
+		}
+	}
+
+	for _, inputByte := range input {
+		if inputByte != 0 {
+			break
+		}
+		outputInts = append(outputInts, 0)
+	}
+
+	outputBytes := make([]byte, 0, estOutputLen)
+	for _, outputInt := range outputInts {
+		outputBytes = append(outputBytes, qrCharset[outputInt])
+	}
+
+	return reverseByteSlice(outputBytes)
 }
 
 func reverseByteSlice(bs []byte) []byte {
